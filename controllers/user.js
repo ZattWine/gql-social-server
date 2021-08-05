@@ -1,4 +1,5 @@
 import User from '../models/userModel.js'
+import { registerSchema } from '../graphql/schemas/user.js'
 import { generateJwtToken } from '../helpers/generateToken.js'
 
 /**
@@ -11,6 +12,12 @@ import { generateJwtToken } from '../helpers/generateToken.js'
  */
 const registerUser = async ({ username, email, password, confirmPassword }) => {
   // validate inputs
+  await registerSchema.validateAsync({
+    username,
+    email,
+    password,
+    confirmPassword,
+  })
 
   // check user is already exists
   const existUser = await User.findOne({ email })
