@@ -1,5 +1,4 @@
 import { ApolloServer } from 'apollo-server'
-import { gql } from 'apollo-server'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 
@@ -21,10 +20,10 @@ mongoose
     useCreateIndex: true,
   })
   .then(() => {
-    console.log('Database connected.')
+    console.log('🚀  Database ready.')
     return server.listen({ port })
   })
-  .then((res) => {
-    console.log(`Server running at ${res.url}`)
+  .then(({ url }) => {
+    console.log(`🚀  Server ready at ${url}`)
   })
   .catch((error) => console.log(error))
