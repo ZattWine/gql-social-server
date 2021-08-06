@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 const commentSchema = new mongoose.Schema(
   {
     body: String,
+    username: String,
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -13,6 +14,7 @@ const commentSchema = new mongoose.Schema(
 
 const reactionSchema = new mongoose.Schema(
   {
+    username: String,
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

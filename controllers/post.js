@@ -2,6 +2,7 @@ import { AuthenticationError } from 'apollo-server'
 
 import Post from '../models/postModel.js'
 import { isAuth } from '../helpers/checkAuth.js'
+import { postSchema } from '../graphql/schemas/post.js'
 
 /**
  * Fetch all posts.
@@ -32,6 +33,11 @@ const getPostById = async (postId) => {
 const createPost = async (body, context) => {
   // check auth
   const user = await isAuth(context)
+
+  // validate inputs
+  await postSchema.validateAsync({
+    body,
+  })
 
   const post = await Post.create({
     body,
