@@ -10,6 +10,11 @@ import {
 const pubsub = new PubSub();
 
 export default {
+  Post: {
+    reactionCount: (parent) => parent.reactions.length,
+    commentCount: (parent) => parent.comments.length,
+  },
+
   Query: {
     getPosts: async () => {
       const posts = await getPosts();

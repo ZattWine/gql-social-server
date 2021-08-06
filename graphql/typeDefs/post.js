@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-express'
+import { gql } from 'apollo-server-express';
 
 export default gql`
   type Post {
@@ -6,7 +6,9 @@ export default gql`
     body: String!
     username: String!
     comments: [Comment]!
+    commentCount: Int!
     reactions: [Reaction]!
+    reactionCount: Int!
     createdAt: String!
     updatedAt: String!
   }
@@ -41,4 +43,4 @@ export default gql`
   type Subscription {
     postCreated: Post!
   }
-`
+`;

@@ -19,6 +19,7 @@ const port = process.env.PORT || 5000;
     useUnifiedTopology: true,
     useCreateIndex: true,
   });
+  console.log(`🚀  Database ready.`);
 
   const app = express();
   const httpServer = createServer(app);
@@ -42,7 +43,7 @@ const port = process.env.PORT || 5000;
 
   httpServer.listen(port, () => {
     console.log(
-      `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+      `🚀  Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
     );
   });
 })();
