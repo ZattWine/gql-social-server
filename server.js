@@ -1,39 +1,35 @@
-import 'dotenv/config'
-import { ApolloServer } from 'apollo-server-express'
-import { createServer } from 'http'
-import { execute, subscribe } from 'graphql'
-import { SubscriptionServer } from 'subscriptions-transport-ws'
-import { makeExecutableSchema } from '@graphql-tools/schema'
-import express from 'express'
-import mongoose from 'mongoose'
-import cors from 'cors'
-import bodyParser from 'body-parser'
+import 'dotenv/config';
+import express from 'express';
+import { createServer } from 'http';
+import { execute, subscribe } from 'graphql';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { ApolloServer } from 'apollo-server-express';
+import mongoose from 'mongoose';
 
-import typeDefs from './graphql/typeDefs/index.js'
-import resolvers from './graphql/resolvers/index.js'
+import typeDefs from './graphql/typeDefs/index.js';
+import resolvers from './graphql/resolvers/index.js';
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 5000;
 
-async function startApolloServer() {
-  // express
-  const app = express()
+(async () => {
+  // database connect
+  await mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+  });
 
-  // disable showing X-Powered-By content
-  app.disable('x-powered-by')
-  // Cross-Origin-Resource-Sharing
-  app.use(cors())
-  app.use(bodyParser.json())
+  const app = express();
+  const httpServer = createServer(app);
+  const schema = makeExecutableSchema({ typeDefs, resolvers });
 
-  const httpServer = createServer(app)
-
-  // setting up apollo server
-  const schema = makeExecutableSchema({ typeDefs, resolvers })
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }) => ({ req, res }),
-  })
-  await apolloServer.start()
-  apolloServer.applyMiddleware({ app, path: '/' })
+    context: ({ req }) => ({ req }),
+  });
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app });
 
   SubscriptionServer.create(
     {
@@ -41,30 +37,32 @@ async function startApolloServer() {
       execute,
       subscribe,
     },
-    {
-      server: httpServer,
-      path: apolloServer.graphqlPath,
-    }
-  )
+    { server: httpServer, path: apolloServer.graphqlPath }
+  );
 
-  await new Promise((resolve) => httpServer.listen({ port }, resolve))
-  console.log(
-    `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
-  )
-  return {
-    apolloServer,
-    app,
-  }
-}
+  httpServer.listen(port, () => {
+    console.log(
+      `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
+    );
+  });
+})();
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-  })
-  .then(() => {
-    console.info(`🚀 Database ready.`)
-    return startApolloServer()
-  })
-  .catch((err) => console.log(err))
+// const apolloServer = new ApolloServer({
+//   typeDefs,
+//   resolvers,
+//   context: ({ req }) => ({ req, pubsub }),
+// })
+
+// mongoose
+//   .connect(process.env.MONGO_URI, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     useCreateIndex: true,
+//   })
+//   .then(() => {
+//     console.info(`🚀 Database ready.`)
+//     return apolloServer.listen({ port })
+//   })
+//   .then(({ url }) => {
+//     console.log(`🚀 Server ready at ${url}`)
+//   })

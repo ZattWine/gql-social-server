@@ -1,45 +1,57 @@
+import { PubSub } from 'graphql-subscriptions';
+
 import {
   getPosts,
   getPostById,
   createPost,
   deletePost,
-} from '../../controllers/post.js'
+} from '../../controllers/post.js';
+
+const pubsub = new PubSub();
 
 export default {
   Query: {
     getPosts: async () => {
-      const posts = await getPosts()
+      const posts = await getPosts();
       if (!posts) {
-        throw new Error('Error on fetching posts.')
+        throw new Error('Error on fetching posts.');
       }
-      return posts
+      return posts;
     },
 
     getPostById: async (_, { postId }) => {
-      const post = await getPostById(postId)
+      const post = await getPostById(postId);
       if (!post) {
-        throw new Error('Post not found.')
+        throw new Error('Post not found.');
       }
-      return post
+      return post;
     },
   },
 
   Mutation: {
     createPost: async (_, { body }, context) => {
-      const post = await createPost(body, context)
+      const post = await createPost(body, context);
       if (!post) {
-        throw new Error('Error on creating post.')
+        throw new Error('Error on creating post.');
       }
+      // subscription
+      pubsub.publish('POST_CREATED', { postCreated: post });
 
-      return post
+      return post;
     },
 
     deletePost: async (_, { postId }, context) => {
-      const result = await deletePost(postId, context)
+      const result = await deletePost(postId, context);
       if (!result) {
-        throw new Error('Error on deleting post.')
+        throw new Error('Error on deleting post.');
       }
-      return result
+      return result;
     },
   },
-}
+
+  Subscription: {
+    postCreated: {
+      subscribe: () => pubsub.asyncIterator(['POST_CREATED']),
+    },
+  },
+};

@@ -37,4 +37,8 @@ export default gql`
     deleteComment(postId: ID!, commentId: ID!): Post!
     reactPost(postId: ID!): Post!
   }
+
+  type Subscription {
+    postCreated: Post!
+  }
 `
