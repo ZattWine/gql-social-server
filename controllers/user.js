@@ -1,14 +1,9 @@
 import User from '../models/userModel.js'
-import { registerSchema } from '../graphql/schemas/user.js'
+import { registerSchema, loginSchema } from '../graphql/schemas/user.js'
 import { generateJwtToken } from '../helpers/generateToken.js'
 
 /**
  * Register user.
- *
- * @param {string} username
- * @param {string} email
- * @param {string} password
- * @returns
  */
 const registerUser = async ({ username, email, password, confirmPassword }) => {
   // validate inputs
@@ -41,4 +36,27 @@ const registerUser = async ({ username, email, password, confirmPassword }) => {
   }
 }
 
-export { registerUser }
+/**
+ * Log in user.
+ */
+const loginUser = async (email, password) => {
+  // validate inputs
+  await loginSchema.validateAsync({
+    email,
+    password,
+  })
+
+  // check user exists or password matching
+  const user = await User.findOne({ email })
+  if (user && (await user.matchPassword(password))) {
+    return {
+      ...user._doc,
+      id: user._id,
+      token: generateJwtToken(user._id),
+    }
+  } else {
+    throw new Error('Invalid email or password.')
+  }
+}
+
+export { registerUser, loginUser }
