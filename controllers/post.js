@@ -1,4 +1,4 @@
-import { AuthenticationError } from 'apollo-server'
+import { AuthenticationError } from 'apollo-server-express'
 
 import Post from '../models/postModel.js'
 import { isAuth } from '../helpers/checkAuth.js'
