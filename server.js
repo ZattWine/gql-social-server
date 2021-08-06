@@ -6,6 +6,7 @@ import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
+import cors from 'cors';
 
 import typeDefs from './graphql/typeDefs/index.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -22,6 +23,8 @@ const port = process.env.PORT || 5000;
   console.log(`🚀  Database ready.`);
 
   const app = express();
+  app.use(cors());
+
   const httpServer = createServer(app);
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
@@ -30,7 +33,7 @@ const port = process.env.PORT || 5000;
     context: ({ req }) => ({ req }),
   });
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app });
+  apolloServer.applyMiddleware({ app, path: '/' });
 
   SubscriptionServer.create(
     {
