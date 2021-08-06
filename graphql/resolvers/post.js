@@ -1,14 +1,45 @@
-import { getPosts } from '../../controllers/post.js'
+import {
+  getPosts,
+  getPostById,
+  createPost,
+  deletePost,
+} from '../../controllers/post.js'
 
 export default {
   Query: {
     getPosts: async () => {
-      try {
-        const posts = await getPosts()
-        return posts
-      } catch (err) {
-        throw new Error(err)
+      const posts = await getPosts()
+      if (!posts) {
+        throw new Error('Error on fetching posts.')
       }
+      return posts
+    },
+
+    getPostById: async (_, { postId }) => {
+      const post = await getPostById(postId)
+      if (!post) {
+        throw new Error('Post not found.')
+      }
+      return post
+    },
+  },
+
+  Mutation: {
+    createPost: async (_, { body }, context) => {
+      const post = await createPost(body, context)
+      if (!post) {
+        throw new Error('Error on creating post.')
+      }
+
+      return post
+    },
+
+    deletePost: async (_, { postId }, context) => {
+      const result = await deletePost(postId, context)
+      if (!result) {
+        throw new Error('Error on deleting post.')
+      }
+      return result
     },
   },
 }

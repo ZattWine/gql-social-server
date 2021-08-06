@@ -11,5 +11,11 @@ export default gql`
 
   type Query {
     getPosts: [Post]
+    getPostById(postId: ID!): Post
+  }
+
+  type Mutation {
+    createPost(body: String!): Post!
+    deletePost(postId: ID!): String!
   }
 `
