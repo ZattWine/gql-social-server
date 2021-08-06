@@ -1,5 +1,9 @@
 import 'dotenv/config'
 import { ApolloServer } from 'apollo-server-express'
+import { createServer } from 'http'
+import { execute, subscribe } from 'graphql'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
+import { makeExecutableSchema } from '@graphql-tools/schema'
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
@@ -11,14 +15,6 @@ import resolvers from './graphql/resolvers/index.js'
 const port = process.env.PORT || 5000
 
 async function startApolloServer() {
-  // setting up apollo server
-  const apolloServer = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context: ({ req, res }) => ({ req, res }),
-  })
-  await apolloServer.start()
-
   // express
   const app = express()
 
@@ -28,9 +24,30 @@ async function startApolloServer() {
   app.use(cors())
   app.use(bodyParser.json())
 
+  const httpServer = createServer(app)
+
+  // setting up apollo server
+  const schema = makeExecutableSchema({ typeDefs, resolvers })
+  const apolloServer = new ApolloServer({
+    schema,
+    context: ({ req, res }) => ({ req, res }),
+  })
+  await apolloServer.start()
   apolloServer.applyMiddleware({ app, path: '/' })
 
-  await new Promise((resolve) => app.listen({ port }, resolve))
+  SubscriptionServer.create(
+    {
+      schema,
+      execute,
+      subscribe,
+    },
+    {
+      server: httpServer,
+      path: apolloServer.graphqlPath,
+    }
+  )
+
+  await new Promise((resolve) => httpServer.listen({ port }, resolve))
   console.log(
     `🚀 Server ready at http://localhost:${port}${apolloServer.graphqlPath}`
   )
