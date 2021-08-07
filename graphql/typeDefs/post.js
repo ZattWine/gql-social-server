@@ -5,6 +5,7 @@ export default gql`
     id: ID!
     body: String!
     username: String!
+    user: String!
     comments: [Comment]!
     commentCount: Int!
     reactions: [Reaction]!
@@ -17,6 +18,7 @@ export default gql`
     id: ID!
     username: String!
     body: String!
+    user: String!
     createdAt: String!
     updatedAt: String!
   }
@@ -24,6 +26,7 @@ export default gql`
   type Reaction {
     id: ID!
     username: String!
+    user: String!
     createdAt: String!
   }
 
